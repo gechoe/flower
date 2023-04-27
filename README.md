@@ -90,7 +90,8 @@ project-template/build $ ../bin/demo
 ## Demo of basic features
 
 TODO: Document the main demos your viewer 
-![Image_1](images/horizontal-line.png)
+Main image of program:
+![Image_1](images/flower.png)
 
 ## Unique features 
 
