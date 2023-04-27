@@ -34,7 +34,7 @@ struct Particle {
   float rot;
   float size;
   bool isDone;
-  float mass;
+  float weight;
   glm::vec3 prevVel;
 };
 
@@ -44,11 +44,10 @@ public:
   }
 
   void setup() {
-    setWindowSize(900, 1000);
+    setWindowSize(600, 600);
     createWaterDroplets(50);
 
     renderer.loadTexture("cube", "../textures/cube.png", 0);
-    renderer.loadTexture("vase", "../textures/vase.png", 0);
     renderer.loadTexture("vase", "../textures/vase.png", 0);
 
     // clean-up repitition later
@@ -145,8 +144,8 @@ public:
     
     renderer.push();
     vec3 scale = wateringCanMesh.scaleVal();
-    renderer.scale(scale * vec3(0.25));
-    renderer.translate(vec3(-28, 27, 0));
+    renderer.scale(scale * vec3(0.30));
+    renderer.translate(vec3(-23, 20.5, 0));
     renderer.rotate(vec3(0.0, 0.0, -0.5));
 
     renderer.mesh(wateringCanMesh);
@@ -185,6 +184,7 @@ public:
 
     if (particlesInVase % 10 == 0) {
       particleGroupings++;
+      moveWaterUp = 0.1;
       moveWaterUp *= particleGroupings;
     }
 
@@ -220,8 +220,9 @@ public:
     // Drawing the obstruction block
     renderer.beginShader("logo");
     renderer.push();
-    renderer.scale(vec3(3.5, 1.5, 1.0));
-    renderer.translate(vec3(-0.1, 0.3, 1.8));
+    renderer.scale(vec3(4.5, 1.75, 1.0));
+    // renderer.translate(vec3(-0.1, 0.3, 1.8));
+    renderer.translate(vec3(-0.5, -1.32, 1.8));
     renderer.cube();
     // renderer.translate();
     renderer.pop();
@@ -230,8 +231,9 @@ public:
     // Drawing the logo
     renderer.beginShader("background");
     renderer.push();
-    renderer.scale(vec3(0.8, 1.2, 1.2));
-    renderer.translate(vec3(-2.35, 0.01, 2.0));
+    renderer.scale(vec3(1.0, 1.5, 1.2));
+    // renderer.translate(vec3(-2.35, 0.01, 2.0));
+    renderer.translate(vec3(-4.2, -1.85, 2.0));
     renderer.mesh(logoMesh);
     renderer.pop();
     renderer.endShader();
@@ -248,7 +250,7 @@ public:
         
         float rVelY = randomize(-0.1, 0.1);
         particle.vel = vec3(0, rVelY, 0);
-        particle.mass = mass;
+        particle.weight = weight;
         
         waterDropletParticles.push_back(particle);
       }
@@ -267,16 +269,16 @@ public:
 
         particle.pos += dt * particle.vel;
 
-        if (checkCollision() == false) {
-          particle.pos += vec3(0.1, 0.0, 0.0);
-        }
+        // if (checkCollision() == false) {
+        //   particle.pos += vec3(0.1, 0.0, 0.0);
+        // }
 
         if (particle.pos.y <= bottom) {
           particle.pos = spoutPos;
           float rVelY = randomize(-0.4, 0.2);
           particle.vel = vec3(0, rVelY, 0);
         } else {
-          particle.vel.y -= dt * (gravity / particle.mass);
+          particle.vel.y -= dt * (gravity / particle.weight);
         }
 
         // if water particle is inside the vase
@@ -370,9 +372,9 @@ protected:
   float pointerX = hammerX - 60, pointerY = 42, pointerWidth = 35, pointerHeight = 35;
   float speed = -0.2f;
   std::vector<Particle> waterDropletParticles;
-  vec3 spoutPos = vec3(-2.72, 4.0, 0.0);
+  vec3 spoutPos = vec3(-2.4, 3.0, 0.0);
   float bottom = -4.0;
-  float gravity = 100, mass = 100, moveWaterUp = 0.1;
+  float gravity = 100, weight = 100, moveWaterUp = 0.0;
   int particleGroupings = 0, particlesInVase = -1;
 
   drawCircle circles;
