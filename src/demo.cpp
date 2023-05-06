@@ -1,16 +1,11 @@
-// Bryn Mawr College, alinen, 2020
-//
+// Bryn Mawr College, gchoe, 2023
 
 #include <cmath>
 #include <string>
 #include <vector>
 #include "agl/plymesh.h"
 #include "agl/window.h"
-// #include "fmod_errors.h"
-// #include "fmod.hpp"
-// #include <mmsystem.h>
 #include "agl/osutils.h"
-// #include "agl/tinygl-cpp.h"
 
 using namespace std;
 using namespace glm;
@@ -22,7 +17,7 @@ struct rgb {
 
 class drawCircle {
   public:
-    int size = 0.1;
+    double size = 0.1;
     rgb rgbColors;
     float xCoord, yCoord;
 };
@@ -45,7 +40,7 @@ public:
 
   void setup() {
     setWindowSize(600, 600);
-    createWaterDroplets(50);
+    createWaterDroplets(70);
 
     renderer.loadTexture("cube", "../textures/cube.png", 0);
     renderer.loadTexture("vase", "../textures/vase.png", 0);
@@ -75,15 +70,24 @@ public:
     drawerMesh = PLYMesh("../models/drawer.ply");
   }
 
+  int width() {
+    return 600;
+  }
+
+  int height() {
+    return 600;
+  }
+
   void mouseMotion(int x, int y, int dx, int dy) {
     if (mouseIsDown(GLFW_MOUSE_BUTTON_LEFT)) {
       // todo: store a circle with the current color, size, x, y
       if (y > 70) { // Prevents user from drawing underneath palette
         drawCircle newCircle = circles;
-        newCircle.xCoord = x;
-        newCircle.yCoord = y;
+        newCircle.xCoord = ((x / (float)width()) * halfWidth * 2) - halfWidth;
+        float newY = height() - y;
+        newCircle.yCoord = ((newY / (float)height()) * halfHeight * 2) - halfHeight;//y;
         newCircle.size = 25;
-        std::cout << newCircle.xCoord << "     " << newCircle.yCoord << std::endl;
+        // std::cout << newCircle.xCoord << "     " << newCircle.yCoord << std::endl;
         circleVector.push_back(newCircle);
       }
     }
@@ -99,9 +103,12 @@ public:
   // Changes brush size, brush transparency, and clears screen if certain keys
   // are pressed
   void keyDown(int key, int mods) override {
-    if (key == GLFW_KEY_C) { // 'C' key
+    if (key == GLFW_KEY_C) { // 'C' key, clears teh user's drawn path
       // Clear vector of circles
       circleVector.clear();
+    } else if (key == GLFW_KEY_R) { // 'R' key, resets the scene/water level
+      // Clear vector of circles
+      reset = true;
     }
   }
 
@@ -180,15 +187,21 @@ public:
     renderer.beginShader("water");
     renderer.push();
     renderer.scale(vec3(1.5, 1.0, 1.5));
-    // renderer.translate(vec3(0, -2, 0));
 
-    if (particlesInVase % 10 == 0) {
-      particleGroupings++;
+    // Sets liimit of having at least a certain amount of particles fall in vase
+    // for water level to increase
+    if (((particlesInVase % 100 == 10) || (particlesInVase % 100 == 50)) && (waterLevel <= -2.5)) {
       moveWaterUp = 0.1;
-      moveWaterUp *= particleGroupings;
+      waterLevel += moveWaterUp;
     }
 
-    renderer.translate(vec3(2.0, -3.4 + moveWaterUp, 2.0));
+    if (reset == true) {
+      waterLevel = -3.4;
+      particlesInVase = 0;
+      reset = false;
+    }
+
+    renderer.translate(vec3(2.0, waterLevel, 2.0));
     renderer.cube();
     renderer.pop();
     renderer.endShader();
@@ -221,10 +234,8 @@ public:
     renderer.beginShader("logo");
     renderer.push();
     renderer.scale(vec3(4.5, 1.75, 1.0));
-    // renderer.translate(vec3(-0.1, 0.3, 1.8));
     renderer.translate(vec3(-0.5, -1.32, 1.8));
     renderer.cube();
-    // renderer.translate();
     renderer.pop();
     renderer.endShader();
 
@@ -232,7 +243,6 @@ public:
     renderer.beginShader("background");
     renderer.push();
     renderer.scale(vec3(1.0, 1.5, 1.2));
-    // renderer.translate(vec3(-2.35, 0.01, 2.0));
     renderer.translate(vec3(-4.2, -1.85, 2.0));
     renderer.mesh(logoMesh);
     renderer.pop();
@@ -241,48 +251,86 @@ public:
 
   void createWaterDroplets(int amount) {
     for (int i = 0; i < amount; i++) {
-      for (int j = 0; j < 10; j++) {
-        Particle particle;
-        particle.color = vec4(0.4, 0.7, 1, 1);
-        particle.size = 0.1;
+      Particle particle;
+      particle.color = vec4(0.4, 0.7, 1, 1);
+      particle.size = 0.1;
 
-        particle.pos = spoutPos;
+      particle.pos = spoutPos;
         
-        float rVelY = randomize(-0.1, 0.1);
-        particle.vel = vec3(0, rVelY, 0);
-        particle.weight = weight;
+      float rVelY = randomize(-0.1, 0.1);
+      particle.vel = vec3(0, rVelY, 0);
+      particle.weight = weight;
         
-        waterDropletParticles.push_back(particle);
-      }
+      waterDropletParticles.push_back(particle);
     }
   }
 
   void updateWaterDroplets(float dt) {
     for (int i = 0; i < waterDropletParticles.size(); i++) {
+      Particle particle = waterDropletParticles[i];
+
       int j = 0;
       while (j < 20) {
-        Particle particle = waterDropletParticles[i];
+        vec3 force = vec3(0, -gravity, 0); // Creates force
+        int numCircles = circleVector.size();
 
-        // int randV = rand() % 100;
-        // float randVel = (speed - (particle.vel.y)) * ((float)randV / 100) + (particle.vel.y);
-        // particle.vel = vec3(0, randVel, 0);
+        // Loops through the circles in the user's drawn path (to see if there
+        //is any collision)
+        for (int k = 0; k < numCircles - 1; k++) {
+          drawCircle circ = circleVector[k];
+          vec3 circPos = vec3(circ.xCoord, circ.yCoord, 0);
 
+          if (glm::distance(circPos, particle.pos) < 0.3) { // collision distance 0.3
+            drawCircle nextCirc = circleVector[k + 1];
+            vec3 nextCircPos = vec3(nextCirc.xCoord, nextCirc.yCoord, 0);
+
+            float lengthCirc = glm::length(nextCircPos - circPos);
+
+            if (lengthCirc > 0.0001) {
+              vec3 direction = normalize(nextCircPos - circPos);
+              force += direction * 0.01f;// 0.1 sideways force
+            }
+
+            float lengthCircPart = glm::length(particle.pos - circPos);
+
+            if (lengthCircPart > 0.000001) {
+              vec3 direction = vec3(0, gravity, 0) / vec3(5);
+              force += direction;
+            }
+          }
+        }
+
+        particle.vel += force * dt;
         particle.pos += dt * particle.vel;
 
-        // if (checkCollision() == false) {
-        //   particle.pos += vec3(0.1, 0.0, 0.0);
-        // }
-
-        if (particle.pos.y <= bottom) {
+        if ((particle.pos.y <= bottom) || (particle.pos.x >= halfWidth)) {
           particle.pos = spoutPos;
           float rVelY = randomize(-0.4, 0.2);
           particle.vel = vec3(0, rVelY, 0);
-        } else {
-          particle.vel.y -= dt * (gravity / particle.weight);
         }
 
-        // if water particle is inside the vase
-        // if ()
+        // Checks if particle is inside the vase and if it hits the water level
+        if ((particle.pos.x >= 2.26 && particle.pos.x <= 3.78) && 
+          (particle.pos.y <= waterLevel)) {
+          particlesInVase += 1;
+          particle.pos = spoutPos;
+          float rVelY = randomize(-0.4, 0.2);
+          particle.vel = vec3(0, rVelY, 0);
+        }
+
+        // If it hits the inside of the vase's right wall, the water particle drops down,
+        // instead of continuing to shoot outside the vase
+        if (particle.pos.x <= 3.78 && particle.pos.x >= 3.75 && particle.pos.y <= -1.93) {
+          float rVelY = randomize(-0.4, 0.2);
+          particle.vel = vec3(0, rVelY, 0);
+        }
+
+        // If it hits outside the vase's left wall, the water particle drops down,
+        // instead of continuing to shoot into the vase
+        if (particle.pos.x <= 2.26 && particle.pos.x >= 2.23 && particle.pos.y <= -1.93) {
+          float rVelY = randomize(-0.4, 0.2);
+          particle.vel = vec3(0, rVelY, 0);
+        }
 
         waterDropletParticles[i] = particle;
 
@@ -293,53 +341,28 @@ public:
     }
   }
 
-  bool checkCollision() {
-    for (int i = 0; i < waterDropletParticles.size(); i++) {
-      for (drawCircle c : circleVector) {
-        bool collisionX = waterDropletParticles[i].pos.x +
-          waterDropletParticles[i].size >= c.xCoord && 
-          c.xCoord + c.size >= waterDropletParticles[i].pos.x;
-        bool collisionY = waterDropletParticles[i].pos.y +
-          waterDropletParticles[i].size >= c.yCoord && 
-          c.yCoord + c.size >= waterDropletParticles[i].pos.y;
-
-        if (collisionX && collisionY == false) {
-          return false;
-        }
-      }
-    }
-
-    return true;
-  }
-
   void drawWaterDroplets() {
     renderer.texture("WaterImage", "waterDropletParticle");
 
     for (int i = 0; i < waterDropletParticles.size(); i++) {
       Particle particle = waterDropletParticles[i];
-      // if (particle.pos.x % j == 0) {
-        renderer.sprite(particle.pos, particle.color, particle.size);
-      // }
+      renderer.sprite(particle.pos, particle.color, particle.size);
     }
-    // }
   }
 
   void draw() {
+    halfWidth = 5;
+    halfHeight = 5 * (width() / height());
     float aspect = ((float)width()) / height();
-    renderer.ortho(-5, 5, -5, 5, 0, 100);
+    renderer.ortho(-(halfWidth), halfWidth, -(halfHeight), halfHeight, 0, 100);
     renderer.lookAt(eyePos, lookPos, up);
 
-    // renderer.beginShader("ground");
-    // renderer.push();
-    // renderer.sphere();
-    // renderer.pop();
-    // renderer.endShader();
-
+    // draws the user drawn path
     for (drawCircle c : circleVector) {
       renderer.beginShader("ground");
       renderer.push();
-      float findX = (c.xCoord * 10) / width() - (3 * (c.xCoord / width() + 1));
-      float findY = (c.yCoord * -10) / height() + 3;
+      float findX = c.xCoord;
+      float findY = c.yCoord;
 
       renderer.translate(vec3(findX, findY, 2));
       renderer.mesh(drawerMesh);
@@ -347,6 +370,7 @@ public:
       renderer.endShader();
     }
 
+    // draws all objects in the scene
     drawBackground();
     drawGround();
     drawWateringCan();
@@ -355,6 +379,7 @@ public:
     drawLogoObstruction();
     drawWaterLevel();
 
+    // draws the water droplet particles
     renderer.beginShader("sprite");
     updateWaterDroplets(dt());
     drawWaterDroplets();
@@ -374,12 +399,14 @@ protected:
   std::vector<Particle> waterDropletParticles;
   vec3 spoutPos = vec3(-2.4, 3.0, 0.0);
   float bottom = -4.0;
-  float gravity = 100, weight = 100, moveWaterUp = 0.0;
+  float gravity = 0.1, weight = 100, moveWaterUp = 0.0;
   int particleGroupings = 0, particlesInVase = -1;
-
+  float waterLevel = -3.4;
   drawCircle circles;
   vector<drawCircle> circleVector;
   float currSize = 10, alpha = 1.0;
+  float halfWidth, halfHeight;
+  bool reset = false, isFull = false;
 };
 
 int main(int argc, char** argv)
