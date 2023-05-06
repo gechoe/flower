@@ -16,6 +16,7 @@ watering can to the flower vase. The water flows down the drawn path and, hopefu
 based on the path drawn, fills the vase. The user will know if the vase is being
 filled based on the rising water level. The c-key clears the path the user drew
 from the screen. The r-key resets the flower vase so the water accumulated disappears.
+The m-key turns the background music on and off.
 
 ![Image_1](images/flower.png)
 
