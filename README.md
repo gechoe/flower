@@ -6,13 +6,16 @@ water droplets from the watering can to the flower pot/vase in order to
 water the flower. The title of the mini game at the bottom left of the screen,
 "FLOWER", as a visual detailing.
 
+**The summary of results:**
 The game generates a watering can (at the top left corner of the screen), a vase
 with flowers and soil (at the bottom right corner of the screen), and the title
 card (at the bottom left of the screen). Water particles fall from the watering
 can as soon as the program is run. The user then draws a path/ramp anywhere on
 the screen where there is open space and leads the water droplets from the
 watering can to the flower vase. The water flows down the drawn path and, hopefully
-based on the path drawn, fills the vase.
+based on the path drawn, fills the vase. The user will know if the vase is being
+filled based on the rising water level. The c-key clears the path the user drew
+from the screen. The r-key resets the flower vase so the water accumulated disappears.
 
 ![Image_1](images/flower.png)
 
