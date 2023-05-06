@@ -44,6 +44,10 @@ water droplets should go in. Particles is used to create the stream of water whi
 is then repeated once it hits either the ground, outside the visible screen,
 or the inside of the flower vase.
 
+To match with the chill, monochrome vibes, I have also added some lofi-esque chill
+beats to the background while the user plays the game. The user can control
+whether to play the music in the background or not by pressing the 'M' key.
+
 **The mechanics:**
 The main functions of this mini-game is for the user to draw a path on the screen
 and have the particles interact with the drawn path. If the user's drawn path
@@ -55,7 +59,8 @@ the user drew is cleared from the screen. If the user clicks 'r' on their keyboa
 the water level no matter how high it is within the vase resets so that the vase
 is empty and no water can be seen. (This resetting of the water level allows for
 the user to redraaw their path and satisfyingly see the vase fill up over and over
-again).
+again). If the user click 'm' the music is stopped (if the music was already on)
+or turned back on (if the music was stopped).
 
 Understanding the basic functionality of the game, the math within this program
 mostly occurs when calculating the flow of the water droplet/particles and their

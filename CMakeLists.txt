@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(project-template)
+project(flower)
 
 if (WIN32) # Include win64 platforms
 
@@ -10,11 +10,13 @@ if (WIN32) # Include win64 platforms
   set(INCLUDE_DIRS
      ./src/agl
      ./src
-     ./external/include )
+     ./external/include
+     external/include/fmod )
 
   set(LIBRARY_DIRS
     lib
-    ./external/lib)
+    ./external/lib
+    external/lib/x64 )
 
   set(CMAKE_CXX_STANDARD 14)
   set(CMAKE_CXX_FLAGS 
@@ -31,11 +33,10 @@ if (WIN32) # Include win64 platforms
   set(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
   set(LIBRARY_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/lib)
 
-
 elseif (APPLE)
 
   set(CMAKE_MACOSX_RPATH 1)
-  set(CMAKE_CXX_FLAGS "-Wall -Wno-deprecated-declarations -Wno-unused-function -Wno-reorder-ctor -Wno-unused-variable -g -stdlib=libc++ -std=c++14")
+  set(CMAKE_CXX_FLAGS "-Wall -Wno-deprecated-declarations -Wno-unused-function -Wno-reorder-ctor -Wno-inconsistent-missing-override -Wno-unused-variable -g -stdlib=libc++ -std=c++14")
   set(LIBRARY_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/lib)
   set(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
   find_library(GL_LIB OpenGL)
@@ -47,9 +48,13 @@ elseif (APPLE)
      ./src/agl
      ./src
     ./external/include
-    /usr/local/include)
+    external/include/fmod 
+    /usr/local/include )
 
-  set(CORE ${GLFW} ${GL_LIB})
+  set(LIBRARY_DIRS 
+    ./external/lib/apple )
+
+  set(CORE ${GLFW} ${GL_LIB} fmod)
 
 elseif (UNIX)
 
@@ -84,14 +89,21 @@ link_directories(${LIBRARY_DIRS})
 file(GLOB SOURCES "src/agl/*.h" "src/agl/*.cpp" "src/agl/mesh/*.h" "src/agl/mesh/*.cpp") 
 
 set(SHADERS
-    shaders/unlit.vs
-    shaders/unlit.fs
-    )
+  shaders/unlit.vs
+  shaders/unlit.fs
+)
 
 add_executable(demo src/demo.cpp ${SOURCES} ${SHADERS})
 target_link_libraries(demo ${CORE})
+# target_link_libraries(demo fmod)
 
 if (WIN32)
   source_group("shaders" FILES ${SHADERS})
   source_group("agl" FILES ${SOURCES})
+  # add_custom_command(TARGET demo POST_BUILD        # Adds a post-build event to MyTest
+  #   COMMAND ${CMAKE_COMMAND} -E copy_if_different  # which executes "cmake - E copy_if_different..."
+  #       "${PROJECT_SOURCE_DIR}/external/lib/x64/fmod.dll"      # <--this is in-file
+  #       $<TARGET_FILE_DIR:demo>)  
+  # set_property(TARGET demo 
+  #   PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/bin")
 endif()

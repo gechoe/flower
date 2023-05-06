@@ -1,11 +1,14 @@
-// Bryn Mawr College, gchoe, 2023
+// Bryn Mawr College, alinen, 2020
+// 
 
 #include <cmath>
 #include <string>
 #include <vector>
 #include "agl/plymesh.h"
 #include "agl/window.h"
-
+#include "fmod/fmod.hpp"
+#include "fmod/fmod_errors.h"
+ 
 using namespace std;
 using namespace glm;
 using namespace agl;
@@ -37,14 +40,41 @@ public:
   Viewer() : Window() {
   }
 
+  ~Viewer() {
+    if (music != NULL)
+    {
+      result = music->release();
+      ERRCHECK(result);
+    }
+    result = system->release();
+    ERRCHECK(result);
+
+    if (waterPlop != NULL)
+    {
+      result = waterPlop->release();
+      ERRCHECK(result);
+    }
+    result = system->release();
+    ERRCHECK(result);
+  }
+
+  void ERRCHECK(FMOD_RESULT result) {
+    if (result != FMOD_OK)
+    {
+      printf("FMOD error! (%d) %s\n", 
+        result, FMOD_ErrorString(result));
+      exit(-1);
+    }
+  }
+
   void setup() {
     setWindowSize(600, 600);
     createWaterDroplets(70);
 
-    renderer.loadTexture("cube", "../textures/cube.png", 0);
-    renderer.loadTexture("vase", "../textures/vase.png", 0);
+    // load textures
+    renderer.loadTexture("waterDropletParticle", "../textures/cube.png", 0);
 
-    // clean-up repitition later
+    // Load shaders
     renderer.loadShader("purple-toon", "../shaders/purple-toon.vs", "../shaders/purple-toon.fs");
     renderer.loadShader("blue-toon", "../shaders/blue-toon.vs", "../shaders/blue-toon.fs");
     renderer.loadShader("background", "../shaders/background.vs", "../shaders/background.fs");
@@ -55,18 +85,49 @@ public:
     renderer.loadShader("logo", "../shaders/logo.vs", "../shaders/logo.fs");
     renderer.loadShader("water", "../shaders/water.vs", "../shaders/water.fs");
 
-    renderer.loadTexture("waterDropletParticle", "../textures/cube.png", 0);
-
+    // Creating PLYMesh
     wateringCanMesh = PLYMesh("../models/waterCan.ply");
     // renderer.setUniform("numTriangles", wateringCanMesh.numTriangles());
     flowersMesh = PLYMesh("../models/flower.ply");
-    // renderer.setUniform("numTriangles", flowersMesh.numTriangles());
     groundMesh = PLYMesh("../models/cube.ply");
-    // renderer.setUniform("numTriangles", groundMesh.numTriangles());
-
     vaseMesh = PLYMesh("../models/vase.ply");
     logoMesh = PLYMesh("../models/flowerWords.ply");
     drawerMesh = PLYMesh("../models/drawer.ply");
+
+    // Add music
+    result = FMOD::System_Create(&system);		
+    ERRCHECK(result);
+
+    result = system->init(100, FMOD_INIT_NORMAL, 0);	
+    ERRCHECK(result);
+
+    // Initialize background music
+    result = system->createStream(
+      "../music/chillBeats.wav", 
+      FMOD_DEFAULT, 0, &music);
+    ERRCHECK(result);
+
+    result = music->setMode(FMOD_LOOP_NORMAL);
+    ERRCHECK(result);
+
+    result = system->playSound(music, 0, true, &backgroundChannel);
+    ERRCHECK(result);
+
+    // Set volume while sound is paused
+    result = backgroundChannel->setVolume(0.2f); 
+    ERRCHECK(result);
+
+    result = backgroundChannel->setPaused(false); 
+    ERRCHECK(result);
+
+    // Initialize foreground water droplet sound
+    result = system->createStream(
+      "../music/waterPlop.wav", 
+      FMOD_DEFAULT, 0, &waterPlop);
+	  ERRCHECK(result);
+
+    isMusicOn = true;
+    // isWaterSoundOn = true;
   }
 
   int width() {
@@ -101,6 +162,36 @@ public:
     } else if (key == GLFW_KEY_R) { // 'R' key, resets the scene/water level
       // Clear vector of circles
       reset = true;
+    } else if (key == GLFW_KEY_M) { // 'M' key, to turn music on and off
+      if (isMusicOn == true) {
+        result = system->playSound(music, 0, true, &backgroundChannel);
+        ERRCHECK(result);
+        isMusicOn = false;
+      } else {
+        // Set volume while sound is paused
+        result = backgroundChannel->setVolume(0.2f); 
+        ERRCHECK(result);
+
+        result = backgroundChannel->setPaused(false); 
+        ERRCHECK(result);
+        // result = system->playSound(music, 0, false, &backgroundChannel);
+        // ERRCHECK(result);
+        isMusicOn = true;
+      }
+    } else if (key == GLFW_KEY_N) { // 'N/ key, to turn off water sound
+      // water moves too fast making this sound play only the beginning tenth of
+      // a second which is no sound, not to be used, put this sound here just for
+      // fun
+      // Plays water plop sound
+      result = system->playSound(waterPlop, 0, false, 0);
+      ERRCHECK(result);
+      system->update();
+
+      // if (isWaterSoundOn == true) {
+      //   isWaterSoundOn = false;
+      // } else {
+      //   isWaterSoundOn = true;
+      // }
     }
   }
 
@@ -177,7 +268,7 @@ public:
     renderer.push();
     renderer.scale(vec3(1.5, 1.0, 1.5));
 
-    // Sets liimit of having at least a certain amount of particles fall in vase
+    // Sets limit of having at least a certain amount of particles fall in vase
     // for water level to increase
     if (((particlesInVase % 100 == 10) || (particlesInVase % 100 == 50)) && (waterLevel <= -2.5)) {
       moveWaterUp = 0.1;
@@ -376,15 +467,25 @@ public:
   }
 
 protected:
+  // music
+  FMOD_RESULT result;
+  FMOD::System *system = NULL;
+  FMOD::Channel *backgroundChannel = NULL;
+  FMOD::Sound *music = NULL, *waterPlop = NULL;
+  bool isMusicOn; //, isWaterSoundOn;
+
+  // objects in scene
   PLYMesh wateringCanMesh, groundMesh, flowersMesh, vaseMesh, logoMesh, drawerMesh;
   std::vector<Particle> waterDropletParticles;
   drawCircle circles;
   vector<drawCircle> circleVector;
   
+  // view
   vec3 eyePos = vec3(0, 0, 5);
   vec3 lookPos = vec3(0, 0, 0);
   vec3 up = vec3(0, 1, 0);
   
+  // mechanics
   vec3 spoutPos = vec3(-2.4, 3.0, 0.0);
   float bottom = -4.0, gravity = 0.1, weight = 100;
   float waterLevel = -3.4, moveWaterUp = 0.0;
