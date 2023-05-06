@@ -229,7 +229,7 @@ directions:
 
 3. C-key function - shows what happens when the c key is pressed (the drawn path
 is cleared from the screen):
-![video3](https://github.com/gechoe/flower/blob/main/images.cKeyFunction.gif)
+![cKey](https://github.com/gechoe/flower/blob/main/images/cKeyFunction.gif)
 
 4. R-key function - shows what happens when the r key is pressed (the water in
 the flower case disappears/resets):
