@@ -221,11 +221,11 @@ flower/build $ ../bin/demo
 
 ## Demo of basic and unique features
 1. Path to vase:
-![video1](https://github.com/gechoe/flower/blob/main/images.path1.gif)
+![video1](https://github.com/gechoe/flower/blob/main/images/path1.gif)
 
 2. Path in opposite direction - shows how particles interact with path in different
 directions:
-![video2](https://github.com/gechoe/flower/blob/main/images.path2.gif)
+![video2](https://github.com/gechoe/flower/blob/main/images/path2.gif)
 
 3. C-key function - shows what happens when the c key is pressed (the drawn path
 is cleared from the screen):
@@ -233,9 +233,9 @@ is cleared from the screen):
 
 4. R-key function - shows what happens when the r key is pressed (the water in
 the flower case disappears/resets):
-![video4](https://github.com/gechoe/flower/blob/main/images.rKeyFunction1.gif)
+![video4](https://github.com/gechoe/flower/blob/main/images/rKeyFunction1.gif)
 
 5. Everything together - shows everything working together, mostly to show how
 even when the r key is pressed if the drawn path leads to the flower vase, the
 vase still refills up with water:
-![video5](https://github.com/gechoe/flower/blob/main/images.rKeyFunction2.gif)
+![video5](https://github.com/gechoe/flower/blob/main/images/rKeyFunction2.gif)
