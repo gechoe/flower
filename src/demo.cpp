@@ -277,7 +277,7 @@ public:
 
             if (lengthCirc > 0.0001) {
               vec3 direction = normalize(nextCircPos - circPos);
-              force += direction * 0.01f;// 0.1 sideways force
+              force += direction * 0.01f; // 0.01 sideways force
             }
 
             float lengthCircPart = glm::length(particle.pos - circPos);
@@ -301,7 +301,7 @@ public:
         // Checks if particle is inside the vase and if it hits the water level
         if ((particle.pos.x >= 2.26 && particle.pos.x <= 3.78) && 
           (particle.pos.y <= waterLevel)) {
-          particlesInVase += 1;
+          particlesInVase++;
           particle.pos = spoutPos;
           float rVelY = randomize(-0.4, 0.2);
           particle.vel = vec3(0, rVelY, 0);
