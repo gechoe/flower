@@ -225,17 +225,17 @@ flower/build $ ../bin/demo
 
 2. Path in opposite direction - shows how particles interact with path in different
 directions:
-![video1](https://github.com/gechoe/flower/tree/main/images.path2.gif)
+![video2](https://github.com/gechoe/flower/tree/main/images.path2.gif)
 
 3. C-key function - shows what happens when the c key is pressed (the drawn path
 is cleared from the screen):
-![video1](https://github.com/gechoe/flower/tree/main/images.cKeyFunction.gif)
+![video3](https://github.com/gechoe/flower/tree/main/images.cKeyFunction.gif)
 
 4. R-key function - shows what happens when the r key is pressed (the water in
 the flower case disappears/resets):
-![video1](https://github.com/gechoe/flower/tree/main/images.rKeyFunction1.gif)
+![video4](https://github.com/gechoe/flower/tree/main/images.rKeyFunction1.gif)
 
 5. Everything together - shows everything working together, mostly to show how
 even when the r key is pressed if the drawn path leads to the flower vase, the
 vase still refills up with water:
-![video1](https://github.com/gechoe/flower/tree/main/images.rKeyFunction2.gif)
+![video5](https://github.com/gechoe/flower/tree/main/images.rKeyFunction2.gif)
