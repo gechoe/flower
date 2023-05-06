@@ -477,5 +477,4 @@ CMakeFiles/demo.dir/src/demo.cpp.o: \
   /Library/Developer/CommandLineTools/usr/bin/../include/c++/v1/optional \
   /Users/gracechoe/Desktop/gchoe/CS313/flower/./src/agl/renderer.h \
   /Library/Developer/CommandLineTools/usr/bin/../include/c++/v1/list \
-  /Users/gracechoe/Desktop/gchoe/CS313/flower/./src/agl/image.h \
-  /Users/gracechoe/Desktop/gchoe/CS313/flower/./src/agl/osutils.h
+  /Users/gracechoe/Desktop/gchoe/CS313/flower/./src/agl/image.h

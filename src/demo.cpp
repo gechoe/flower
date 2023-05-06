@@ -5,7 +5,6 @@
 #include <vector>
 #include "agl/plymesh.h"
 #include "agl/window.h"
-#include "agl/osutils.h"
 
 using namespace std;
 using namespace glm;
@@ -81,38 +80,28 @@ public:
   void mouseMotion(int x, int y, int dx, int dy) {
     if (mouseIsDown(GLFW_MOUSE_BUTTON_LEFT)) {
       // todo: store a circle with the current color, size, x, y
-      if (y > 70) { // Prevents user from drawing underneath palette
+      if (y > 70) { // Prevents user from drawing underneath ground
         drawCircle newCircle = circles;
         newCircle.xCoord = ((x / (float)width()) * halfWidth * 2) - halfWidth;
         float newY = height() - y;
-        newCircle.yCoord = ((newY / (float)height()) * halfHeight * 2) - halfHeight;//y;
+        newCircle.yCoord = ((newY / (float)height()) * halfHeight * 2) - halfHeight;
         newCircle.size = 25;
-        // std::cout << newCircle.xCoord << "     " << newCircle.yCoord << std::endl;
         circleVector.push_back(newCircle);
       }
     }
-  }
-
-  void mouseDown(int button, int mods) {
-  }
-
-  void mouseUp(int button, int mods) {
   }
 
   // keyDown()
   // Changes brush size, brush transparency, and clears screen if certain keys
   // are pressed
   void keyDown(int key, int mods) override {
-    if (key == GLFW_KEY_C) { // 'C' key, clears teh user's drawn path
+    if (key == GLFW_KEY_C) { // 'C' key, clears the user's drawn path
       // Clear vector of circles
       circleVector.clear();
     } else if (key == GLFW_KEY_R) { // 'R' key, resets the scene/water level
       // Clear vector of circles
       reset = true;
     }
-  }
-
-  void scroll(float dx, float dy) {
   }
 
   float randomize(float min, float max) {
@@ -388,25 +377,20 @@ public:
 
 protected:
   PLYMesh wateringCanMesh, groundMesh, flowersMesh, vaseMesh, logoMesh, drawerMesh;
-  vec3 eyePos = vec3(0, 0, 5); // vec3(0, 0, 3);
-  vec3 lookPos = vec3(0, 0, 0);
-  vec3 up = vec3(0, 1, 0);
-  float hamHandleX = width() - 40, hamHandleY = 35, hamHandleWidth = 35, hamHandleHeight = 45;
-  float hammerX = width() - 40, hammerY = 42, hammerWidth = 35, hammerHeight = 25;
-  float pointHandleX = hammerX - 60, pointHandleY = 35 - hamHandleHeight / 4, pointHandleWidth = hamHandleWidth / 3, pointHandleHeight = hamHandleHeight / 2;
-  float pointerX = hammerX - 60, pointerY = 42, pointerWidth = 35, pointerHeight = 35;
-  float speed = -0.2f;
   std::vector<Particle> waterDropletParticles;
-  vec3 spoutPos = vec3(-2.4, 3.0, 0.0);
-  float bottom = -4.0;
-  float gravity = 0.1, weight = 100, moveWaterUp = 0.0;
-  int particleGroupings = 0, particlesInVase = -1;
-  float waterLevel = -3.4;
   drawCircle circles;
   vector<drawCircle> circleVector;
-  float currSize = 10, alpha = 1.0;
+  
+  vec3 eyePos = vec3(0, 0, 5);
+  vec3 lookPos = vec3(0, 0, 0);
+  vec3 up = vec3(0, 1, 0);
+  
+  vec3 spoutPos = vec3(-2.4, 3.0, 0.0);
+  float bottom = -4.0, gravity = 0.1, weight = 100;
+  float waterLevel = -3.4, moveWaterUp = 0.0;
+  int particlesInVase = 0;
   float halfWidth, halfHeight;
-  bool reset = false, isFull = false;
+  bool reset = false;
 };
 
 int main(int argc, char** argv)

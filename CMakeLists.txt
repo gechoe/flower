@@ -54,7 +54,7 @@ elseif (APPLE)
 elseif (UNIX)
 
   set(OpenGL_GL_PREFERENCE  "GLVND")
-  set(CMAKE_CXX_FLAGS "-Wall -g -std=c++14 -Wno-comment -Wno-sign-compare -Wno-reorder -Wno-unused-function")
+  set(CMAKE_CXX_FLAGS "-Wall -g -std=c++14 -Wno-comment -Wno-sign-compare -Wno-reorder -Wno-unused-function -Wno-inconsistent-missing-override")
   set(LIBRARY_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/lib)
   set(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
 
