@@ -1,5 +1,13 @@
 // Bryn Mawr College, alinen, 2020
-// 
+/**
+ * demo.cpp
+ * Author: Grace Choe
+ * Date: Spring 2023
+ *
+ * Description:
+ * This program is a mini game where the user draws a path from the watering can
+ * to the flower pot to allow the water particles to enter the flower pot.
+ */
 
 #include <cmath>
 #include <string>
@@ -93,6 +101,8 @@ public:
     vaseMesh = PLYMesh("../models/vase.ply");
     logoMesh = PLYMesh("../models/flowerWords.ply");
     drawerMesh = PLYMesh("../models/drawer.ply");
+    musicNote = PLYMesh("../models/biggerNote.ply");
+    slash = PLYMesh("../models/slash.ply");
 
     // Add music
     result = FMOD::System_Create(&system);		
@@ -329,6 +339,27 @@ public:
     renderer.endShader();
   }
 
+  void drawMusicNote() {
+    // Drawing the obstruction block
+    renderer.beginShader("soil");
+    renderer.push();
+    renderer.scale(vec3(0.25, 0.25, 0.25));
+    renderer.translate(vec3(17.0, 17.0, 1.5));
+    renderer.mesh(musicNote);
+    renderer.pop();
+    renderer.endShader();
+  }
+
+  void drawNoMusic() {
+    renderer.beginShader("ground");
+    renderer.push();
+    renderer.scale(vec3(0.28, 0.28, 0.2));
+    renderer.translate(vec3(15.0, 15.2, 2.5));
+    renderer.mesh(slash);
+    renderer.pop();
+    renderer.endShader();
+  }
+
   void createWaterDroplets(int amount) {
     for (int i = 0; i < amount; i++) {
       Particle particle;
@@ -368,7 +399,7 @@ public:
 
             if (lengthCirc > 0.0001) {
               vec3 direction = normalize(nextCircPos - circPos);
-              force += direction * 0.01f; // 0.01 sideways force
+              force += direction * 0.01f;// * 0.01f; // 0.01 sideways force
             }
 
             float lengthCircPart = glm::length(particle.pos - circPos);
@@ -459,6 +490,11 @@ public:
     drawLogoObstruction();
     drawWaterLevel();
 
+    drawMusicNote();
+    if (isMusicOn == false) { // shows whether music is on or off
+      drawNoMusic();
+    }
+
     // draws the water droplet particles
     renderer.beginShader("sprite");
     updateWaterDroplets(dt());
@@ -476,6 +512,7 @@ protected:
 
   // objects in scene
   PLYMesh wateringCanMesh, groundMesh, flowersMesh, vaseMesh, logoMesh, drawerMesh;
+  PLYMesh musicNote, slash;
   std::vector<Particle> waterDropletParticles;
   drawCircle circles;
   vector<drawCircle> circleVector;
