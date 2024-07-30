@@ -244,7 +244,9 @@ is cleared from the screen):
 the flower case disappears/resets):
 ![video4](https://github.com/gechoe/flower/blob/main/images/rKeyFunction1.gif)
 
-5. Everything together - shows everything working together, mostly to show how
+5. M-key function - Turns background lofi music on and off. 
+
+6. Everything together - shows everything working together, mostly to show how
 even when the r key is pressed if the drawn path leads to the flower vase, the
 vase still refills up with water:
 ![video5](https://github.com/gechoe/flower/blob/main/images/rKeyFunction2.gif)
